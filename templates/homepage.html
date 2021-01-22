@@ -1,0 +1,122 @@
+<html>
+<head>
+   <title>Projet</title>
+   <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+   <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"type="text/javascript" charset="utf-8"></script>
+   <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"type="text/javascript" charset="utf-8"></script>
+   <script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js" type="text/javascript" charset="utf-8"></script>
+   <script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js" type="text/javascript" charset="utf-8"></script>
+   <link rel="stylesheet" type="text/css"href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
+
+   <!-- Style -->
+   <link rel="stylesheet" type="text/css" href="static/index.css" />
+   <link rel="stylesheet" type="text/css" href="static/sidebar.css" />
+   <link rel="stylesheet" type="text/css" href="static/search.css" />
+</head>
+
+<body style='margin: 0'>
+   <div style="width: 100%; height: 100%" id="map"></div>
+   <div id="sidebar">
+      <div class="gradient-line"></div>
+      <div class="header">
+         <h1>Projet Cloud computing</h1>
+         <p>
+            identifiez un lieu par son geoname Id ou par le couple latitude / longitude
+         </p>
+         <form action="/geoname" method="post">
+            <div class="group">
+               <h2>GeonameId</h2>
+               <input class="isoline-controls text-input" id="geoname-value" type="number" name="geonameid" min="0" placeholder="GeonameId">
+               {% if message1 %}
+                  <p class="error">{{ message1 }}</p>
+               {% endif %}
+               {% if tab %}
+                  {% for n in tab %}
+                     <p>{{ n }}</p>
+                  {% endfor %}
+               {% endif %}
+               <button class="button-val">Valider</button>
+            </div>
+         </form>
+         <h2>Ou</h2>
+         <form method="post">
+            <div class="group">
+               <h2>Latitude / Longitude</h2>
+               <input class="isoline-controls text-input" id="latitude-value" type="text" name="latitude" placeholder="Latitude">
+               <input class="isoline-controls text-input" id="longitude-value" type="text" name="longitude" placeholder="Longitude">
+               {% if message %}
+                  <p class="error">{{ message }}</p>
+               {% endif %}
+               <button class="button-val">Valider</button>
+            </div>
+         </form>
+      </div>
+   </div>
+
+   <script>
+
+      {% if list is defined %}
+         // Si on a passé une liste affiche les points et centre
+         var test = {{ list | safe }}
+
+         function moveMapTo(map){
+           map.setCenter({lat:test[0].latitude, lng:test[0].longitude});
+           map.setZoom(10);
+         }
+
+         function addMarkersToMap(map) {
+            for (let i = 0; i < 10; i++) {
+              var lati = test[i].latitude;
+              var longi = test[i].longitude;
+              var marker = new H.map.Marker({lat:lati, lng:longi});
+              map.addObject(marker);
+            }
+         }
+      {% endif %}
+
+      // Initialize the platform object:
+      var platform = new H.service.Platform({
+        'apikey': 'XGZnJ-ACTOAZWfqadH4_284rVbuhyLKASnye_OBjcJg'
+      });
+
+	  // Obtain the default map types from the platform object
+      var maptypes = platform.createDefaultLayers();
+
+      // Initialize a map:
+      var map = new H.Map(
+         document.getElementById('map'),
+         maptypes.vector.normal.map, {
+            zoom: 5,
+         }
+      );
+
+	  // Enable the event system on the map instance:
+	  var mapEvents = new H.mapevents.MapEvents(map);
+
+	  // Add event listener:
+	  map.addEventListener('tap', function(evt) {
+         // Log 'tap' and 'mouse' events:
+         console.log(evt.type, evt.currentPointer.type);
+      });
+
+	  // Instantiate the default behavior, providing the mapEvents object:
+	  var behavior = new H.mapevents.Behavior(mapEvents);
+
+	  window.addEventListener('resize',()=> get.ViewProt().resize())
+	  // var marker = new H.map.Marker({ lat: lat, lng: long });
+
+	  // Add the marker to the map:
+	  // map.addObject(marker);
+
+	  // Create the default UI:
+	  var ui = H.ui.UI.createDefault(map, maptypes);
+
+	  // Now use the map as required...
+      window.onload = function () {
+        addMarkersToMap(map);
+        moveMapTo(map);
+      }
+
+   </script>
+</body>
+</html>
